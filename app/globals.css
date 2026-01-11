@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+/* Custom CSS Variables for theming */
+@theme {
+  /* Colors */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-muted: #f5f5f5;
+  --color-muted-foreground: #737373;
+  --color-border: #e5e5e5;
+  --color-input: #e5e5e5;
+  --color-ring: #0a0a0a;
+  
+  /* Primary colors */
+  --color-primary: #0a0a0a;
+  --color-primary-foreground: #fafafa;
+  
+  /* Secondary colors */
+  --color-secondary: #f5f5f5;
+  --color-secondary-foreground: #0a0a0a;
+  
+  /* Accent colors */
+  --color-accent: #f5f5f5;
+  --color-accent-foreground: #0a0a0a;
+  
+  /* Destructive colors */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #fafafa;
+  
+  /* Trading specific colors */
+  --color-profit: #22c55e;
+  --color-loss: #ef4444;
+  --color-neutral: #6b7280;
+  --color-chart-1: #3b82f6;
+  --color-chart-2: #22c55e;
+  --color-chart-3: #f59e0b;
+  --color-chart-4: #ef4444;
+  --color-chart-5: #8b5cf6;
+  
+  /* Card colors */
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a0a;
+  
+  /* Popover colors */
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a0a0a;
+  
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  
+  /* Fonts */
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
+  --color-muted: #262626;
+  --color-muted-foreground: #a3a3a3;
+  --color-border: #262626;
+  --color-input: #262626;
+  --color-ring: #d4d4d4;
+  
+  --color-primary: #fafafa;
+  --color-primary-foreground: #0a0a0a;
+  
+  --color-secondary: #262626;
+  --color-secondary-foreground: #fafafa;
+  
+  --color-accent: #262626;
+  --color-accent-foreground: #fafafa;
+  
+  --color-card: #0a0a0a;
+  --color-card-foreground: #fafafa;
+  
+  --color-popover: #0a0a0a;
+  --color-popover-foreground: #fafafa;
+}
+
+/* Base styles */
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Utility classes for trading colors */
+.text-profit {
+  color: var(--color-profit);
+}
+
+.text-loss {
+  color: var(--color-loss);
+}
+
+.bg-profit {
+  background-color: var(--color-profit);
+}
+
+.bg-loss {
+  background-color: var(--color-loss);
+}

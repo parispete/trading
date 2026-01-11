@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn typecheck:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx typescript:*)",
+      "Bash(ls:*)",
+      "Bash(corepack enable:*)",
+      "Bash(npm install:*)",
+      "Bash(pip install:*)",
+      "Bash(python scripts/setup_database.py:*)",
+      "Bash(set:*)",
+      "Bash(python scripts/init_journal_db.py:*)",
+      "Bash(python:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(npx next dev:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd //c \"taskkill /PID 346136 /F\")",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(cmd //c \"taskkill /PID 552932 /F\")",
+      "Bash(cmd //c \"taskkill /F /IM node.exe\")",
+      "Bash(cmd //c \"taskkill /PID 364996 /F\")",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(dir:*)"
+    ]
+  }
+}
