@@ -12,6 +12,7 @@ import {
   ClosePositionDialog,
   RollPositionDialog,
   AssignPositionDialog,
+  RollChainDialog,
 } from "@/modules/trading/components/journal";
 import { useOpenPositions } from "@/modules/trading/hooks/journal-hooks";
 import type { TradePosition } from "@/modules/trading/types";
@@ -29,6 +30,9 @@ export default function JournalPage() {
     null
   );
   const [positionToAssign, setPositionToAssign] = useState<TradePosition | null>(
+    null
+  );
+  const [positionForRollChain, setPositionForRollChain] = useState<TradePosition | null>(
     null
   );
 
@@ -91,6 +95,7 @@ export default function JournalPage() {
             onClose={(position) => setPositionToClose(position)}
             onRoll={(position) => setPositionToRoll(position)}
             onAssign={(position) => setPositionToAssign(position)}
+            onViewRollChain={(position) => setPositionForRollChain(position)}
           />
         </CardContent>
       </Card>
@@ -134,6 +139,14 @@ export default function JournalPage() {
         }}
         onSuccess={() => {
           // Refresh is handled by React Query invalidation
+        }}
+      />
+
+      {/* Roll Chain Dialog */}
+      <RollChainDialog
+        position={positionForRollChain}
+        onOpenChange={(open) => {
+          if (!open) setPositionForRollChain(null);
         }}
       />
     </div>

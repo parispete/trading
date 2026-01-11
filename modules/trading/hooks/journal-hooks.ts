@@ -35,6 +35,7 @@ export const journalKeys = {
   tradeHistory: (params: Record<string, unknown>) =>
     [...journalKeys.trades(), "history", params] as const,
   trade: (id: number) => [...journalKeys.trades(), id] as const,
+  rollChain: (id: number) => [...journalKeys.trades(), id, "roll-chain"] as const,
   // Dividends
   dividends: () => [...journalKeys.all, "dividends"] as const,
   dividendsList: (params: Record<string, unknown>) =>
@@ -150,6 +151,14 @@ export function useOpenPositions(depotId?: number) {
       if (depotId) params.set("depotId", depotId.toString());
       return fetchJson<TradePosition[]>(`/api/journal/trades?${params}`);
     },
+  });
+}
+
+export function useRollChain(tradeId: number | null) {
+  return useQuery({
+    queryKey: journalKeys.rollChain(tradeId ?? 0),
+    queryFn: () => fetchJson<TradePosition[]>(`/api/journal/trades/${tradeId}/roll-chain`),
+    enabled: tradeId !== null,
   });
 }
 

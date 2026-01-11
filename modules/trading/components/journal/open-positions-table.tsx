@@ -22,6 +22,7 @@ interface OpenPositionsTableProps {
   onClose?: (position: TradePosition) => void;
   onRoll?: (position: TradePosition) => void;
   onAssign?: (position: TradePosition) => void;
+  onViewRollChain?: (position: TradePosition) => void;
 }
 
 function formatCurrency(value: number | null): string {
@@ -87,6 +88,7 @@ export function OpenPositionsTable({
   onClose,
   onRoll,
   onAssign,
+  onViewRollChain,
 }: OpenPositionsTableProps) {
   const { data: positions, isLoading, error } = useOpenPositions(depotId);
   const [sortBy, setSortBy] = useState<"ticker" | "dte" | "type">("dte");
@@ -193,7 +195,11 @@ export function OpenPositionsTable({
               <TableCell className={cn("text-right font-medium", getRorColor(position.ror))}>
                 {formatPercent(position.ror)}
                 {position.rollCount > 0 && (
-                  <span className="ml-1 text-xs text-muted-foreground">
+                  <span
+                    className="ml-1 cursor-pointer text-xs text-muted-foreground underline decoration-dotted hover:text-foreground"
+                    onDoubleClick={() => onViewRollChain?.(position)}
+                    title="Double-click to view roll history"
+                  >
                     (R{position.rollCount})
                   </span>
                 )}

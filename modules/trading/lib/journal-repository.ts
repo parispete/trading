@@ -378,7 +378,7 @@ export async function getTradePosition(
 
 /**
  * Get the roll chain for a position (all previous positions that were rolled into this one)
- * Returns array of positions from oldest to current
+ * Returns array of positions from oldest to current (internal use)
  */
 async function getRollChain(positionId: number): Promise<TradePositionRow[]> {
   const chain: TradePositionRow[] = [];
@@ -499,6 +499,20 @@ export async function getOpenPositions(params: {
   }
 
   return positions;
+}
+
+/**
+ * Get full roll chain details for a position (public API)
+ * Returns array of TradePosition objects from oldest to current
+ */
+export async function getRollChainDetails(positionId: number): Promise<TradePosition[]> {
+  const chain = await getRollChain(positionId);
+
+  if (chain.length === 0) {
+    throw new Error(`Trade position ${positionId} not found`);
+  }
+
+  return chain.map(mapTradePosition);
 }
 
 export async function closePosition(
