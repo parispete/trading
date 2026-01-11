@@ -70,6 +70,18 @@ function getDteColor(dte: number | null): string {
   return "text-muted-foreground";
 }
 
+function formatPercent(value: number | null): string {
+  if (value === null) return "-";
+  return `${value.toFixed(2)}%`;
+}
+
+function getRorColor(ror: number | null): string {
+  if (ror === null) return "";
+  if (ror >= 2) return "text-profit";
+  if (ror >= 1) return "text-yellow-600 dark:text-yellow-400";
+  return "text-muted-foreground";
+}
+
 export function OpenPositionsTable({
   depotId,
   onClose,
@@ -143,6 +155,8 @@ export function OpenPositionsTable({
           <TableHead className="text-right">DTE</TableHead>
           <TableHead className="text-right">Qty</TableHead>
           <TableHead className="text-right">Premium</TableHead>
+          <TableHead className="text-right" title="Rate of Return = (Premium - Fees) / Strike">RoR%</TableHead>
+          <TableHead className="text-right" title="Weekly Rate of Return = RoR / Weeks">WRoR%</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -175,6 +189,17 @@ export function OpenPositionsTable({
                 {position.premiumPerContract
                   ? formatCurrency(position.premiumPerContract * position.quantity * 100)
                   : "-"}
+              </TableCell>
+              <TableCell className={cn("text-right font-medium", getRorColor(position.ror))}>
+                {formatPercent(position.ror)}
+                {position.rollCount > 0 && (
+                  <span className="ml-1 text-xs text-muted-foreground">
+                    (R{position.rollCount})
+                  </span>
+                )}
+              </TableCell>
+              <TableCell className={cn("text-right font-medium", getRorColor(position.wror))}>
+                {formatPercent(position.wror)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">

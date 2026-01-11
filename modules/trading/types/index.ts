@@ -366,6 +366,15 @@ export interface TradePosition {
   breakEven: number | null;
   dteAtOpen: number | null;
 
+  // Roll chain totals (for RoR calculation)
+  chainTotalPremium: number | null;
+  chainTotalFees: number | null;
+  rollCount: number;
+
+  // Rate of Return calculations
+  ror: number | null; // (chainPremium - chainFees) / strike * 100
+  wror: number | null; // ror / weeks to expiration
+
   createdAt: Date;
   updatedAt: Date;
 }

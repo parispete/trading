@@ -376,6 +376,88 @@ export async function getTradePosition(
   return mapTradePosition(row);
 }
 
+/**
+ * Get the roll chain for a position (all previous positions that were rolled into this one)
+ * Returns array of positions from oldest to current
+ */
+async function getRollChain(positionId: number): Promise<TradePositionRow[]> {
+  const chain: TradePositionRow[] = [];
+  let currentId: number | null = positionId;
+
+  while (currentId !== null) {
+    const row = await queryOne<TradePositionRow>(
+      `SELECT tp.*, s.ticker, s.name as security_name
+       FROM trade_position tp
+       JOIN security s ON tp.security_id = s.id
+       WHERE tp.id = ?`,
+      [currentId]
+    );
+
+    if (!row) break;
+    chain.unshift(row); // Add to beginning (oldest first)
+    currentId = row.rolled_from_trade_id;
+  }
+
+  return chain;
+}
+
+/**
+ * Calculate RoR metrics for a position including its roll chain
+ */
+function calculateRorMetrics(
+  position: TradePositionRow,
+  rollChain: TradePositionRow[]
+): {
+  chainTotalPremium: number;
+  chainTotalFees: number;
+  rollCount: number;
+  ror: number | null;
+  wror: number | null;
+} {
+  // Sum premiums and fees from entire roll chain
+  let chainTotalPremium = 0;
+  let chainTotalFees = 0;
+
+  for (const pos of rollChain) {
+    // Premium: premiumPerContract * quantity * 100 (options multiplier)
+    if (pos.premium_per_contract) {
+      chainTotalPremium += pos.premium_per_contract * pos.quantity * 100;
+    }
+    // Fees: commission_open + commission_close (if closed via roll)
+    chainTotalFees += pos.commission_open || 0;
+    if (pos.commission_close) {
+      chainTotalFees += pos.commission_close;
+    }
+  }
+
+  const rollCount = rollChain.length - 1; // Number of rolls (chain length minus 1)
+
+  // RoR calculation: (premium - fees) / (strike * 100 * quantity) * 100
+  // Only for options with strike price
+  let ror: number | null = null;
+  let wror: number | null = null;
+
+  if (position.strike_price && position.position_type !== "LONG_STOCK") {
+    const capitalAtRisk = position.strike_price * 100 * position.quantity;
+    ror = ((chainTotalPremium - chainTotalFees) / capitalAtRisk) * 100;
+
+    // WRoR: RoR / weeks from first open to expiration
+    if (position.expiration_date && rollChain.length > 0) {
+      const firstOpenDate = new Date(rollChain[0].open_date);
+      const expirationDate = new Date(position.expiration_date);
+      const daysTotal = Math.ceil(
+        (expirationDate.getTime() - firstOpenDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const weeks = daysTotal / 7;
+      if (weeks > 0) {
+        wror = ror / weeks;
+      }
+    }
+  }
+
+  return { chainTotalPremium, chainTotalFees, rollCount, ror, wror };
+}
+
 export async function getOpenPositions(params: {
   depotId?: number;
   positionType?: string;
@@ -407,7 +489,16 @@ export async function getOpenPositions(params: {
   sql += " ORDER BY tp.expiration_date ASC, s.ticker";
 
   const rows = await query<TradePositionRow>(sql, queryParams);
-  return rows.map(mapTradePosition);
+
+  // Calculate RoR metrics for each position (including roll chains)
+  const positions: TradePosition[] = [];
+  for (const row of rows) {
+    const rollChain = await getRollChain(row.id);
+    const rorMetrics = calculateRorMetrics(row, rollChain);
+    positions.push(mapTradePositionWithRor(row, rorMetrics));
+  }
+
+  return positions;
 }
 
 export async function closePosition(
@@ -699,8 +790,33 @@ function mapTradePosition(row: TradePositionRow): TradePosition {
     realizedPl: row.realized_pl,
     breakEven: row.break_even,
     dteAtOpen: row.dte_at_open,
+    chainTotalPremium: null,
+    chainTotalFees: null,
+    rollCount: 0,
+    ror: null,
+    wror: null,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
+  };
+}
+
+function mapTradePositionWithRor(
+  row: TradePositionRow,
+  rorMetrics: {
+    chainTotalPremium: number;
+    chainTotalFees: number;
+    rollCount: number;
+    ror: number | null;
+    wror: number | null;
+  }
+): TradePosition {
+  return {
+    ...mapTradePosition(row),
+    chainTotalPremium: rorMetrics.chainTotalPremium,
+    chainTotalFees: rorMetrics.chainTotalFees,
+    rollCount: rorMetrics.rollCount,
+    ror: rorMetrics.ror,
+    wror: rorMetrics.wror,
   };
 }
 

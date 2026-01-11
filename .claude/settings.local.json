@@ -25,7 +25,12 @@
       "Bash(cmd //c \"taskkill /PID 364996 /F\")",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Trading Journal Platform for Options Wheel Strategy\n\nComplete trading journal platform implementation including:\n\n## Frontend \\(Next.js 16\\)\n- Dashboard with YTD summary cards, open positions, expiring soon alerts\n- Trade management dialogs \\(New Trade, Close, Roll, Assign\\)\n- Depot selector with filtering\n- React Query hooks for data fetching and mutations\n\n## Backend \\(API Routes\\)\n- Journal CRUD operations: trades, depots, dividends, settings\n- Position lifecycle management: close, roll, assign\n- Dashboard aggregation endpoint with YTD statistics\n\n## Database \\(DuckDB\\)\n- Complete journal schema with 13 tables\n- Sequences for auto-increment IDs\n- Support for wheel strategy lifecycle tracking\n\n## Python Data Sourcing\n- Tiingo API integration for stock data\n- Database schema initialization\n- Seed data scripts for development\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

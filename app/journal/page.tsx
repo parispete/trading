@@ -13,10 +13,9 @@ import {
   RollPositionDialog,
   AssignPositionDialog,
 } from "@/modules/trading/components/journal";
-import { useDashboard } from "@/modules/trading/hooks/journal-hooks";
+import { useOpenPositions } from "@/modules/trading/hooks/journal-hooks";
 import type { TradePosition } from "@/modules/trading/types";
-import { Plus, Calendar, TrendingUp } from "lucide-react";
-import { format } from "date-fns";
+import { Plus } from "lucide-react";
 
 export default function JournalPage() {
   const currentYear = new Date().getFullYear();
@@ -33,10 +32,8 @@ export default function JournalPage() {
     null
   );
 
-  const { data: dashboardData, isLoading } = useDashboard(
-    selectedDepot,
-    selectedYear
-  );
+  // Use openPositions directly for accurate count
+  const { data: openPositions } = useOpenPositions(selectedDepot);
 
   return (
     <div className="container mx-auto space-y-6 p-6">
@@ -80,135 +77,23 @@ export default function JournalPage() {
       {/* YTD Summary Cards */}
       <YtdSummaryCards depotId={selectedDepot} year={selectedYear} />
 
-      {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Open Positions - Takes 2 columns */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Open Positions</CardTitle>
-            {dashboardData && (
-              <Badge variant="secondary">
-                {dashboardData.openPositions?.totalPositions ?? 0} positions
-              </Badge>
-            )}
-          </CardHeader>
-          <CardContent>
-            <OpenPositionsTable
-              depotId={selectedDepot}
-              onClose={(position) => setPositionToClose(position)}
-              onRoll={(position) => setPositionToRoll(position)}
-              onAssign={(position) => setPositionToAssign(position)}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Expiring Soon */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Expiring Soon
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-12 animate-pulse rounded bg-muted"
-                    />
-                  ))}
-                </div>
-              ) : dashboardData?.expiringSoon &&
-                dashboardData.expiringSoon.length > 0 ? (
-                <div className="space-y-2">
-                  {dashboardData.expiringSoon.slice(0, 5).map((position) => (
-                    <div
-                      key={position.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
-                    >
-                      <div>
-                        <span className="font-medium">{position.ticker}</span>
-                        <span className="ml-2 text-sm text-muted-foreground">
-                          ${position.strikePrice}
-                        </span>
-                      </div>
-                      <Badge
-                        variant="warning"
-                        className="text-xs"
-                      >
-                        {position.expirationDate
-                          ? format(
-                              new Date(position.expirationDate),
-                              "MMM dd"
-                            )
-                          : "N/A"}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground">
-                  No positions expiring in the next 7 days
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-12 animate-pulse rounded bg-muted"
-                    />
-                  ))}
-                </div>
-              ) : dashboardData?.recentActivity &&
-                dashboardData.recentActivity.length > 0 ? (
-                <div className="space-y-2">
-                  {dashboardData.recentActivity.slice(0, 5).map((trade) => (
-                    <div
-                      key={trade.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
-                    >
-                      <div>
-                        <span className="font-medium">{trade.ticker}</span>
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          {trade.positionType.replace("_", " ")}
-                        </span>
-                      </div>
-                      <Badge
-                        variant={
-                          trade.status === "OPEN" ? "secondary" : "outline"
-                        }
-                      >
-                        {trade.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground">
-                  No recent activity
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      {/* Open Positions - Full Width */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Open Positions</CardTitle>
+          <Badge variant="secondary">
+            {openPositions?.length ?? 0} positions
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <OpenPositionsTable
+            depotId={selectedDepot}
+            onClose={(position) => setPositionToClose(position)}
+            onRoll={(position) => setPositionToRoll(position)}
+            onAssign={(position) => setPositionToAssign(position)}
+          />
+        </CardContent>
+      </Card>
 
       {/* Trade Form Dialog */}
       <TradeForm
